@@ -1,0 +1,21 @@
+{
+	"name": "kagome-wasm",
+	"version": "0.0.0",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"scripts": {
+		"build": "build",
+		"test": "ts-node ./test.ts"
+	},
+	"license": "MIT",
+	"devDependencies": {
+		"ts-node": "^10.9.2",
+		"typescript": "^5.8.3"
+	},
+	"files": [
+		"index.js",
+		"index.d.ts",
+		"wasm_exec.js",
+		"kagome.wasm"
+	]
+}
