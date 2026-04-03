@@ -20,9 +20,9 @@ async function init() {
 	kagome_tokenize = global.kagome_tokenize;
 }
 
-function tokenize(text) {
+function tokenize(text, sysdict = "ipa") {
 	if (!kagome_tokenize) throw new Error("Kagome is not initialized. Call init() first.");
-	return kagome_tokenize(text).map((token) => ({
+	return kagome_tokenize(text, sysdict).map((token) => ({
 		...token,
 		pos: token.pos.split(","),
 		features: token.features.split(","),
