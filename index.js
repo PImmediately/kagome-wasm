@@ -13,7 +13,7 @@ async function init() {
 	if (hasInit) return;
 	hasInit = true;
 
-	const wasm = fs.readFileSync("./kagome.wasm");
+	const wasm = fs.readFileSync(`${__dirname}/kagome.wasm`);
 	const result = await WebAssembly.instantiate(wasm, go.importObject);
 	go.run(result.instance);
 
