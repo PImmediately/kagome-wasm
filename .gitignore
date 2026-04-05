@@ -1,2 +1,6 @@
 # Node.js
 /node_modules
+
+# Go
+/kagome.wasm
+/wasm_exec.js
