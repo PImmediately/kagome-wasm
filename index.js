@@ -1,32 +1,42 @@
-const fs = require("node:fs");
+const path = require("node:path");
+const { Worker } = require("node:worker_threads");
 
-require("./wasm_exec.js");
+let worker;
+let ready;
+let msgId = 0;
+const pending = new Map();
 
-const go = new Go();
-globalThis.crypto = require("node:crypto").webcrypto;
-globalThis.performance = require("node:perf_hooks").performance;
-
-let kagome_tokenize;
-
-let hasInit = false;
-async function init() {
-	if (hasInit) return;
-	hasInit = true;
-
-	const wasm = fs.readFileSync(`${__dirname}/kagome.wasm`);
-	const result = await WebAssembly.instantiate(wasm, go.importObject);
-	go.run(result.instance);
-
-	kagome_tokenize = global.kagome_tokenize;
+function init() {
+	if (ready) return ready;
+	worker = new Worker(path.join(__dirname, "index.worker.js"));
+	ready = new Promise((resolve, reject) => {
+		worker.once("message", (msg) => {
+			if (msg.id === "ready") resolve();
+		});
+		worker.once("error", reject);
+	});
+	worker.on("message", (msg) => {
+		if (msg.id === "ready") return;
+		const p = pending.get(msg.id);
+		if (!p) return;
+		pending.delete(msg.id);
+		if (msg.error) p.reject(new Error(msg.error));
+		else p.resolve(msg.tokens);
+	});
+	worker.on("error", (err) => {
+		for (const p of pending.values()) p.reject(err);
+		pending.clear();
+	});
+	return ready;
 }
 
 function tokenize(text, sysdict = "ipa") {
-	if (!kagome_tokenize) throw new Error("Kagome is not initialized. Call init() first.");
-	return kagome_tokenize(text, sysdict).map((token) => ({
-		...token,
-		pos: token.pos.split(","),
-		features: token.features.split(","),
-	}));
+	if (!worker) throw new Error("Kagome is not initialized. Call init() first.");
+	const id = msgId++;
+	return new Promise((resolve, reject) => {
+		pending.set(id, { resolve, reject });
+		worker.postMessage({ id, text, sysdict });
+	});
 }
 
 module.exports = {

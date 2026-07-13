@@ -8,7 +8,7 @@ import * as Kagome from "kagome-wasm";
 (async () => {
 	await Kagome.init();
 
-	const tokens = Kagome.tokenize("すもももももももものうち");
+	const tokens = await Kagome.tokenize("すもももももももものうち");
 	console.log(tokens);
 })();
 ```

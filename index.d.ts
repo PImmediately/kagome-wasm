@@ -26,4 +26,4 @@ export function init(): Promise<void>;
  * @param sysdict - System dictionary. Defaults to `"ipa"`.
  * @returns An array of {@link Token}.
  */
-export function tokenize(text: string, sysdict?: SysDict): Token[];
+export function tokenize(text: string, sysdict?: SysDict): Promise<Token[]>;
